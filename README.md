@@ -57,7 +57,7 @@ Churn rate reflects the percentage of customers who stop using a company’s ser
 * Batch Prediction: Upload a CSV file to get churn predictions for multiple customers at once.
 
 📁 Project Structure
-,,,
+'''
 churn_predictor/
     ├── data/
     │ └── churn.csv # Dataset used for training/testing
@@ -69,4 +69,4 @@ churn_predictor/
     ├── preprocessing.py # Data cleaning and feature engineering script
     ├── README.md # Project documentation
     ├── requirements.txt # Python dependencies
-,,,
+'''
