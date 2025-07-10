@@ -39,3 +39,32 @@ Churn rate reflects the percentage of customers who stop using a company’s ser
    git clone https://github.com/your-username/churn_predictor.git
    cd churn_predictor
 
+2. Install dependencies:
+    pip install -r requirements.txt
+
+3. Launch the Streamlit app:
+    streamlit run p.py
+
+📦 Features
+* Load customer data and explore it visually
+* Make predictions for individual customers or in batch
+* View churn probability and risk factors
+* Clean and intuitive UI built with Streamlit
+
+📊 Prediction Modes
+* Online Prediction: Enter a single customer's data manually for instant prediction.
+
+* Batch Prediction: Upload a CSV file to get churn predictions for multiple customers at once.
+
+📁 Project Structure
+    churn_predictor/
+    ├── data/
+    │ └── churn.csv # Dataset used for training/testing
+    │
+    ├── notebook/
+    │ ├── EDA.ipynb # Exploratory Data Analysis notebook
+    │ └── model.sav # Serialized trained model
+    ├── app.py # Streamlit web app
+    ├── preprocessing.py # Data cleaning and feature engineering script
+    ├── README.md # Project documentation
+    ├── requirements.txt # Python dependencies
