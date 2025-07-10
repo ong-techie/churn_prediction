@@ -56,3 +56,5 @@ Churn rate reflects the percentage of customers who stop using a company’s ser
 
 * Batch Prediction: Upload a CSV file to get churn predictions for multiple customers at once.
 
+
+![App Demo](streamlit-app.gif)
