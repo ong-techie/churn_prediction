@@ -1,73 +1,75 @@
-# --- app.py (Updated) ---
 import streamlit as st
 import pandas as pd
-import numpy as np
 import joblib
-from PIL import Image
+import os
 
-# Load model and preprocessing tools
-model = joblib.load("notebook/model.sav")
+# Load trained pipeline
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Import preprocessing function
-from preprocessing import preprocess
+MODEL_PATH = os.path.join(BASE_DIR, "notebook", "model_pipeline.sav")
+model = joblib.load(MODEL_PATH)
 
-def main():
-    st.title("Telco Customer Churn Prediction")
+st.set_page_config(page_title="Churn Prediction", layout="centered")
+st.title("📉 Telco Customer Churn Prediction")
 
-    image = Image.open("App.jpg")
-    mode = st.sidebar.selectbox("Choose prediction mode:", ["Online", "Batch"])
-    st.sidebar.image(image, caption="Churn Predictor")
+st.write("Enter customer details to predict churn probability.")
 
-    if mode == "Online":
-        st.subheader("Enter customer details")
+# -------- Input UI --------
+input_data = {
+    'gender': st.selectbox('Gender', ['Male', 'Female']),
+    'SeniorCitizen': st.selectbox('Senior Citizen', [0, 1]),
+    'Partner': st.selectbox('Partner', ['Yes', 'No']),
+    'Dependents': st.selectbox('Dependents', ['Yes', 'No']),
+    'tenure': st.slider('Tenure (months)', 0, 72, 1),
+    'PhoneService': st.selectbox('Phone Service', ['Yes', 'No']),
+    'MultipleLines': st.selectbox('Multiple Lines', ['Yes', 'No', 'No phone service']),
+    'InternetService': st.selectbox('Internet Service', ['DSL', 'Fiber optic', 'No']),
+    'OnlineSecurity': st.selectbox('Online Security', ['Yes', 'No', 'No internet service']),
+    'OnlineBackup': st.selectbox('Online Backup', ['Yes', 'No', 'No internet service']),
+    'DeviceProtection': st.selectbox('Device Protection', ['Yes', 'No', 'No internet service']),
+    'TechSupport': st.selectbox('Tech Support', ['Yes', 'No', 'No internet service']),
+    'StreamingTV': st.selectbox('Streaming TV', ['Yes', 'No', 'No internet service']),
+    'StreamingMovies': st.selectbox('Streaming Movies', ['Yes', 'No', 'No internet service']),
+    'Contract': st.selectbox('Contract', ['Month-to-month', 'One year', 'Two year']),
+    'PaperlessBilling': st.selectbox('Paperless Billing', ['Yes', 'No']),
+    'PaymentMethod': st.selectbox(
+        'Payment Method',
+        [
+            'Electronic check',
+            'Mailed check',
+            'Bank transfer (automatic)',
+            'Credit card (automatic)'
+        ]
+    ),
+    'MonthlyCharges': st.number_input('Monthly Charges', 0.0, 200.0, 70.0),
+    'TotalCharges': st.number_input('Total Charges', 0.0, 10000.0, 1000.0)
+}
 
-        inputs = {
-            'SeniorCitizen': st.selectbox('Senior Citizen:', ('Yes', 'No')),
-            'Dependents': st.selectbox('Dependent:', ('Yes', 'No')),
-            'tenure': st.slider('Tenure (months)', 0, 72, 1),
-            'PhoneService': st.selectbox('Phone Service:', ('Yes', 'No')),
-            'MultipleLines': st.selectbox('Multiple Lines:', ('Yes','No','No phone service')),
-            'InternetService': st.selectbox('Internet Service:', ('DSL', 'Fiber optic', 'No')),
-            'OnlineSecurity': st.selectbox('Online Security:', ('Yes','No','No internet service')),
-            'OnlineBackup': st.selectbox('Online Backup:', ('Yes','No','No internet service')),
-            'TechSupport': st.selectbox('Tech Support:', ('Yes','No','No internet service')),
-            'StreamingTV': st.selectbox('Streaming TV:', ('Yes','No','No internet service')),
-            'StreamingMovies': st.selectbox('Streaming Movies:', ('Yes','No','No internet service')),
-            'Contract': st.selectbox('Contract:', ('Month-to-month', 'One year', 'Two year')),
-            'PaperlessBilling': st.selectbox('Paperless Billing:', ('Yes', 'No')),
-            'PaymentMethod': st.selectbox('Payment Method:', (
-                'Electronic check', 'Mailed check', 'Bank transfer (automatic)','Credit card (automatic)')),
-            'MonthlyCharges': st.number_input('Monthly Charges', 0, 150, 70),
-            'TotalCharges': st.number_input('Total Charges', 0, 10000, 1000)
-        }
+df_input = pd.DataFrame([input_data])
 
-        df = pd.DataFrame([inputs])
-        st.write("Input Summary:", df)
+# ---- Feature engineering (MUST match training) ----
 
-        if st.button("Predict"):
-            try:
-                processed = preprocess(df)
-                result = model.predict(processed)[0]
-                msg = 'Yes, the customer will terminate the service.' if result == 1 else 'No, the customer is happy.'
-                st.success(msg)
-            except Exception as e:
-                st.error(f"Error in prediction: {e}")
+# tenure_bucket
+df_input['tenure_bucket'] = pd.cut(
+    df_input['tenure'],
+    bins=[0, 12, 24, 48, 72],
+    labels=['0-1yr', '1-2yr', '2-4yr', '4-6yr']
+)
 
-    else:
-        st.subheader("Upload a CSV file for batch prediction")
-        uploaded = st.file_uploader("Choose file", type=["csv"])
+# charges_per_month
+df_input['charges_per_month'] = (
+    df_input['TotalCharges'] / (df_input['tenure'] + 1)
+)
 
-        if uploaded is not None:
-            data = pd.read_csv(uploaded)
-            st.write("Data Preview:", data.head())
-            if st.button("Predict Batch"):
-                try:
-                    processed = preprocess(data)
-                    results = model.predict(processed)
-                    data['Prediction'] = np.where(results == 1, 'Yes', 'No')
-                    st.write("Prediction Results:", data[['Prediction']])
-                except Exception as e:
-                    st.error(f"Error in batch prediction: {e}")
 
-if __name__ == "__main__":
-    main()
+
+# -------- Prediction --------
+if st.button("Predict Churn"):
+    proba = model.predict_proba(df_input)[0][1]
+    prediction = "YES – High Risk" if proba >= 0.5 else "NO – Low Risk"
+
+    st.subheader("Prediction Result")
+    st.success(f"**{prediction}**")
+    st.write(f"Churn Probability: **{proba:.2%}**")
+
+    st.progress(min(int(proba * 100), 100))

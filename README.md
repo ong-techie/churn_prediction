@@ -1,6 +1,7 @@
 # Customer Churn Prediction 🧠📉
 
-Customer churn prediction is critical for subscription-based businesses to identify and retain unhappy customers. This machine learning-based project helps forecast customer attrition by analyzing behavioral and historical data to generate actionable insights.
+Customer churn prediction is critical for subscription-based businesses to proactively identify customers who are likely to leave and take timely retention actions.
+This project uses machine learning (XGBoost + Scikit-learn pipelines) to predict churn probability from customer behavior and service usage data, and exposes the model via an interactive Streamlit application.
 
 ## 🔍 Problem Statement
 
@@ -13,8 +14,8 @@ Churn rate reflects the percentage of customers who stop using a company’s ser
 ## 🎯 Project Goals
 
 - Predict the likelihood of customer churn using historical data
-- Enable both **online** (real-time) and **batch** predictions
-- Provide a user-friendly interface for data input and visualization
+- Use Pipeline + GridSearchCV for consistent preprocessing and modeling
+- Support real-time (online) predictions
 
 ## 🧰 Tech Stack
 
@@ -30,13 +31,13 @@ Churn rate reflects the percentage of customers who stop using a company’s ser
 2. **Data Acquisition**: Collect data from CRM systems, analytics tools, and feedback.
 3. **Data Preprocessing**: Clean, transform, and explore the dataset for modeling.
 4. **Modeling**: Train and evaluate models (e.g., Logistic Regression, Random Forest, etc.).
-5. **Deployment**: Provide real-time and batch prediction functionality via Streamlit app.
+5. **Deployment**: Provide real-time prediction functionality via Streamlit app.
 
 ## 🚀 How to Run
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/churn_predictor.git
+   git clone https://github.com/ong-techie/churn_predictor.git
    cd churn_predictor
 
 2. Install dependencies:
@@ -54,7 +55,24 @@ Churn rate reflects the percentage of customers who stop using a company’s ser
 📊 Prediction Modes
 * Online Prediction: Enter a single customer's data manually for instant prediction.
 
-* Batch Prediction: Upload a CSV file to get churn predictions for multiple customers at once.
+🏆 Model Performance
+| Model               | ROC-AUC        |
+| ------------------- | -------------- |
+| Logistic Regression | ~0.83          |
+| Decision Tree       | ~0.83          |
+| Random Forest       | ~0.85          |
+| **XGBoost (Final)** | **~0.86–0.88** |
 
-
-![App Demo](streamlit-app.gif)
+📁 Project Structure
+churn_predictor/
+│
+├── data/
+│   └── churn.csv
+│
+├── notebook/
+│   └── model_pipeline.sav
+│   └── model_train.ipynb
+│ 
+├── app.py
+├── requirements.txt
+└── README.md
